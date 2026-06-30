@@ -19,6 +19,7 @@ from custom_components.geekmagic.widgets.chart import ChartWidget
 from custom_components.geekmagic.widgets.climate import ClimateWidget
 from custom_components.geekmagic.widgets.clock import ClockWidget
 from custom_components.geekmagic.widgets.entity import EntityWidget
+from custom_components.geekmagic.widgets.entity_list import EntityListDisplay, EntityListWidget
 from custom_components.geekmagic.widgets.gauge import GaugeWidget
 from custom_components.geekmagic.widgets.helpers import (
     get_binary_sensor_icon,
@@ -1370,6 +1371,101 @@ class TestStatusListWidget:
         )
         widget.render(ctx, state)
         assert img.size == (480, 480)
+
+
+class TestEntityListWidget:
+    """Tests for EntityListWidget."""
+
+    def test_init(self):
+        """Test entity list widget initialization."""
+        config = WidgetConfig(
+            widget_type="entity_list",
+            slot=0,
+            options={"entities": [], "title": "Overview"},
+        )
+        widget = EntityListWidget(config)
+        assert widget.entities == []
+        assert widget.title == "Overview"
+        assert widget.show_unit is True
+        assert widget.show_icon is True
+
+    def test_get_entities(self):
+        """Test entity dependencies from mixed entity formats."""
+        config = WidgetConfig(
+            widget_type="entity_list",
+            slot=0,
+            options={
+                "entities": [
+                    "sensor.temp",
+                    ["sensor.humidity", "Humidity"],
+                    {"entity_id": "binary_sensor.door", "label": "Door"},
+                ]
+            },
+        )
+        widget = EntityListWidget(config)
+        assert widget.get_entities() == ["sensor.temp", "sensor.humidity", "binary_sensor.door"]
+
+    def test_render_with_entities(self, renderer, canvas, rect, hass):
+        """Test rendering multiple entity values with unit/translation behavior."""
+        _img, draw = canvas
+        ctx = RenderContext(draw, rect, renderer)
+        hass.states.async_set(
+            "sensor.temp",
+            "23.5",
+            {"friendly_name": "Temperature", "unit_of_measurement": "°C"},
+        )
+        hass.states.async_set(
+            "binary_sensor.front_door",
+            "on",
+            {"friendly_name": "Front Door", "device_class": "door"},
+        )
+
+        config = WidgetConfig(
+            widget_type="entity_list",
+            slot=0,
+            options={
+                "title": "Home",
+                "entities": [
+                    {"entity_id": "sensor.temp"},
+                    {"entity_id": "binary_sensor.front_door"},
+                ],
+            },
+        )
+        widget = EntityListWidget(config)
+        state = _build_widget_state(
+            hass, extra_entities=["sensor.temp", "binary_sensor.front_door"]
+        )
+        component = widget.render(ctx, state)
+        assert isinstance(component, EntityListDisplay)
+        values = [value for _, value, _ in component.items]
+        assert values == ["23.5°C", "Open"]
+
+    def test_render_attribute_precision(self, renderer, canvas, rect, hass):
+        """Test rendering attribute values with precision formatting."""
+        _img, draw = canvas
+        ctx = RenderContext(draw, rect, renderer)
+        hass.states.async_set(
+            "sensor.weather",
+            "ignored",
+            {"friendly_name": "Weather", "feels_like": 21.2345, "unit_of_measurement": "°C"},
+        )
+        config = WidgetConfig(
+            widget_type="entity_list",
+            slot=0,
+            options={
+                "entities": [{"entity_id": "sensor.weather"}],
+                "attribute": "feels_like",
+                "precision": 1,
+                "show_unit": False,
+                "show_icon": False,
+            },
+        )
+        widget = EntityListWidget(config)
+        state = _build_widget_state(hass, extra_entities=["sensor.weather"])
+        component = widget.render(ctx, state)
+        assert isinstance(component, EntityListDisplay)
+        values = [value for _, value, _ in component.items]
+        assert values == ["21.2"]
 
 
 class TestWeatherWidget:

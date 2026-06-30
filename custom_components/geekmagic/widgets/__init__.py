@@ -12,6 +12,7 @@ from .chart import ChartWidget
 from .climate import ClimateWidget
 from .clock import ClockWidget
 from .entity import EntityWidget
+from .entity_list import EntityListWidget
 from .gauge import GaugeWidget
 from .icon import IconWidget
 from .media import MediaWidget
@@ -29,6 +30,7 @@ __all__ = [
     "ChartWidget",
     "ClimateWidget",
     "ClockWidget",
+    "EntityListWidget",
     "EntityWidget",
     "GaugeWidget",
     "IconWidget",
@@ -51,6 +53,7 @@ _ALL_WIDGETS: list[type[Widget]] = [
     ChartWidget,
     ClimateWidget,
     ClockWidget,
+    EntityListWidget,
     EntityWidget,
     GaugeWidget,
     IconWidget,
