@@ -1438,8 +1438,7 @@ class TestEntityListWidget:
         component = widget.render(ctx, state)
         assert isinstance(component, EntityListDisplay)
         values = [value for _, value, _ in component.items]
-        assert "23.5°C" in values
-        assert "Open" in values
+        assert values == ["23.5°C", "Open"]
 
     def test_render_attribute_precision(self, renderer, canvas, rect, hass):
         """Test rendering attribute values with precision formatting."""
@@ -1466,7 +1465,7 @@ class TestEntityListWidget:
         component = widget.render(ctx, state)
         assert isinstance(component, EntityListDisplay)
         values = [value for _, value, _ in component.items]
-        assert "21.2" in values
+        assert values == ["21.2"]
 
 
 class TestWeatherWidget:

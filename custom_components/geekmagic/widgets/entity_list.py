@@ -109,6 +109,8 @@ class EntityListWidget(Widget):
     def __init__(self, config: WidgetConfig) -> None:
         """Initialize the entity list widget."""
         super().__init__(config)
+        # Uses the frontend "status_entities" array editor shape:
+        # [{entity_id, label?, icon?}] (also accepts tuple/string for compatibility).
         self.entities = config.options.get("entities", [])
         self.title = config.options.get("title")
         self.show_unit = config.options.get("show_unit", True)
@@ -147,7 +149,7 @@ class EntityListWidget(Widget):
 
         title = self.title
         if not title and not self.entities:
-            title = self.config.entity_id or PLACEHOLDER_NAME
+            title = PLACEHOLDER_NAME
 
         return EntityListDisplay(items=items, title=title)
 
