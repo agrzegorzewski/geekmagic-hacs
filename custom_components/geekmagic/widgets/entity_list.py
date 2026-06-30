@@ -39,6 +39,9 @@ class EntityListDisplay(Component):
     def render(self, ctx: RenderContext, x: int, y: int, width: int, height: int) -> None:
         """Render list with optional title and label/value rows."""
         padding = max(2, int(min(width, height) * 0.05))
+        icon_size = max(10, min(16, int(min(width, height) * 0.12)))
+        row_gap = max(4, int(min(width, height) * 0.03))
+        list_gap = max(2, int(min(width, height) * 0.02))
         show_title = bool(self.title) and width >= 100
         rows: list[Component] = []
 
@@ -46,7 +49,7 @@ class EntityListDisplay(Component):
             rows.append(
                 Text(
                     text=self.title.upper(),
-                    font="small",
+                    font="tertiary",
                     color=THEME_TEXT_SECONDARY,
                     align="start",
                     truncate=True,
@@ -56,24 +59,24 @@ class EntityListDisplay(Component):
         for label, value, icon in self.items:
             row_children: list[Component] = []
             if icon:
-                row_children.append(Icon(name=icon, size=13, color=THEME_TEXT_SECONDARY))
+                row_children.append(Icon(name=icon, size=icon_size, color=THEME_TEXT_SECONDARY))
             row_children.append(
                 LabelValueRow(
                     label=label,
                     value=value,
                     label_color=THEME_TEXT_SECONDARY,
                     value_color=THEME_TEXT_PRIMARY,
-                    gap=6,
+                    gap=row_gap,
                 )
             )
-            rows.append(Row(children=row_children, gap=6, align="center", justify="start"))
+            rows.append(Row(children=row_children, gap=row_gap, align="center", justify="start"))
 
         if not rows:
-            rows.append(Text(text=PLACEHOLDER_VALUE, font="small", color=THEME_TEXT_PRIMARY))
+            rows.append(Text(text=PLACEHOLDER_VALUE, font="secondary", color=THEME_TEXT_PRIMARY))
 
         Column(
             children=rows,
-            gap=3 if show_title else 2,
+            gap=list_gap + 1 if show_title else list_gap,
             padding=padding,
             align="stretch",
             justify="start",
