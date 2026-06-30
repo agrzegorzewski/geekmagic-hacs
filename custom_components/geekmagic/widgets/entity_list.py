@@ -18,12 +18,30 @@ from .components import (
     Row,
     Text,
 )
-from .entity import _get_entity_icon
-from .helpers import translate_binary_state
+from .helpers import get_binary_sensor_icon, translate_binary_state
 
 if TYPE_CHECKING:
     from ..render_context import RenderContext
     from .state import EntityState, WidgetState
+
+
+MAX_TITLE_CASE_LENGTH = 16
+
+
+def _get_entity_icon(entity_state: EntityState | None) -> str | None:
+    """Get icon from entity state, handling MDI format and state-specific icons."""
+    if entity_state is None:
+        return None
+
+    if entity_state.entity_id.startswith("binary_sensor."):
+        icon = get_binary_sensor_icon(entity_state.state, entity_state.device_class)
+        if icon:
+            return icon.removeprefix("mdi:")
+
+    icon = entity_state.icon
+    if icon and icon.startswith("mdi:"):
+        return icon.removeprefix("mdi:")
+    return None
 
 
 @dataclass
@@ -186,7 +204,11 @@ class EntityListWidget(Widget):
             value = entity.state
             if entity.entity_id.startswith("binary_sensor."):
                 value = translate_binary_state(value, entity.device_class)
-            elif isinstance(value, str) and value.isalpha() and len(value) <= 16:
+            elif (
+                isinstance(value, str)
+                and value.isalpha()
+                and len(value) <= MAX_TITLE_CASE_LENGTH
+            ):
                 value = value.title()
 
         if self.precision is not None:
