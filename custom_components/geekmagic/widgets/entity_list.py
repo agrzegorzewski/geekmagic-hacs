@@ -43,12 +43,13 @@ class EntityListDisplay(Component):
         row_gap = max(4, int(min(width, height) * 0.03))
         list_gap = max(2, int(min(width, height) * 0.02))
         show_title = bool(self.title) and width >= 100
+        title_text = self.title.upper() if self.title else ""
         rows: list[Component] = []
 
         if show_title:
             rows.append(
                 Text(
-                    text=self.title.upper(),
+                    text=title_text,
                     font="tertiary",
                     color=THEME_TEXT_SECONDARY,
                     align="start",
@@ -126,7 +127,7 @@ class EntityListWidget(Widget):
                 entity_id = entry.get("entity_id")
                 if entity_id:
                     entity_ids.append(entity_id)
-            elif isinstance(entry, list | tuple) and entry:
+            elif isinstance(entry, (list, tuple)) and entry:
                 entity_ids.append(str(entry[0]))
             elif isinstance(entry, str):
                 entity_ids.append(entry)
@@ -162,7 +163,7 @@ class EntityListWidget(Widget):
             if isinstance(icon, str) and icon.startswith("mdi:"):
                 icon = icon.removeprefix("mdi:")
             return entity_id, label, icon
-        if isinstance(entry, list | tuple):
+        if isinstance(entry, (list, tuple)):
             entity_id = str(entry[0]) if entry else None
             label = str(entry[1]) if len(entry) > 1 else None
             icon = str(entry[2]) if len(entry) > 2 else None
